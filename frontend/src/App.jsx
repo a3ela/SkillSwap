@@ -1,35 +1,48 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+// src/App.jsx
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Layout from "./components/layout/Layout";
+import Home from "./pages/Home";
+import Login from "./pages/Login";
+
+// Temporary Register component
+const Register = () => (
+  <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12">
+    <div className="max-w-md w-full bg-white p-8 rounded-lg shadow">
+      <h2 className="text-2xl font-bold mb-4 text-center">
+        Register Page - Coming Soon
+      </h2>
+      <p className="text-gray-600 text-center">
+        Registration functionality will be implemented soon!
+      </p>
+    </div>
+  </div>
+);
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <Router>
+      <Layout>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route
+            path="/matches"
+            element={
+              <div className="p-8 text-center">Matches Page - Coming Soon</div>
+            }
+          />
+          <Route
+            path="/chat"
+            element={
+              <div className="p-8 text-center">Chat Page - Coming Soon</div>
+            }
+          />
+        </Routes>
+      </Layout>
+    </Router>
+  );
 }
 
-export default App
+export default App;
