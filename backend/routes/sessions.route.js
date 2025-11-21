@@ -4,7 +4,7 @@ const {
   createSession,
   getUserSessions,
   updateSessionStatus,
-} = require("../controllers/sessionController");
+} = require("../controllers/session.controller");
 const { protect } = require("../middleware/auth");
 
 const router = express.Router();

@@ -5,7 +5,7 @@ const {
   getOrCreateChat,
   sendMessage,
   getChatMessages
-} = require('../controllers/chatController');
+} = require('../controllers/chat.controller');
 const { protect } = require('../middleware/auth');
 
 const router = express.Router();

@@ -1,6 +1,7 @@
 // backend/server.js
 const express = require("express");
 const mongoose = require("mongoose");
+const connectDB = require("./config/db");
 const cors = require("cors");
 const http = require("http");
 const socketio = require("socket.io");
@@ -39,13 +40,7 @@ app.use(cors());
 app.use(express.json());
 
 // Connect to MongoDB
-mongoose.connect(
-  process.env.MONGODB_URI || "mongodb://localhost:27017/skillswap",
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  }
-);
+connectDB();
 
 // Routes
 app.use("/api/auth", require("./routes/auth.route"));
