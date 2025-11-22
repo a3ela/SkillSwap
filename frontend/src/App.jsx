@@ -1,32 +1,43 @@
-// src/App.jsx
-import React from "react";
+import { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import Layout from "./components/layout/Layout";
 import Home from "./pages/Home";
 import LoginPage from "./pages/LoginPage";
-
-// Temporary Register component
-const Register = () => (
-  <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12">
-    <div className="max-w-md w-full bg-white p-8 rounded-lg shadow">
-      <h2 className="text-2xl font-bold mb-4 text-center">
-        Register Page - Coming Soon
-      </h2>
-      <p className="text-gray-600 text-center">
-        Registration functionality will be implemented soon!
-      </p>
-    </div>
-  </div>
-);
+import OAuthSuccess from "./components/auth/OAuthSuccess"; 
+import ProtectedRoute from "./components/auth/ProtectedRoute";
+import Dashboard from './pages/Dashboard';
+import Profile from './pages/Profile';
+import { setCredentials } from "./store/slices/authSlice";
 
 function App() {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const userInfo = localStorage.getItem("userInfo");
+    if (userInfo) {
+      dispatch(setCredentials(JSON.parse(userInfo)));
+    }
+  }, [dispatch]);
+
   return (
     <Router>
       <Layout>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<Register />} />
+          {/* <Route path="/register" element={<RegisterPage />} /> */}
+          {/* Add this route for OAuth success */}
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/oauth-success" element={<OAuthSuccess />} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/matches"
             element={
