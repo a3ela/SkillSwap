@@ -24,7 +24,10 @@ const UserSchema = new mongoose.Schema({
     minlength: 6,
     select: false,
   },
-
+avatar: {
+    type: String,
+    default: '' 
+  },
   // OAuth fields
   authProvider: {
     type: String,

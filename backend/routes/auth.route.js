@@ -1,4 +1,3 @@
-// backend/routes/auth.js
 const express = require("express");
 const passport = require("passport");
 const {
@@ -10,6 +9,7 @@ const {
   resetPassword,
   oauthSuccess,
   oauthFailure,
+  getMe
 } = require("../controllers/auth.controller");
 
 const router = express.Router();
@@ -22,14 +22,18 @@ router.post("/resend-verification", resendVerification);
 router.post("/forgot-password", forgotPassword);
 router.put("/reset-password", resetPassword);
 
-// OAuth Routes
 router.get(
   "/google",
-  passport.authenticate("google", { scope: ["profile", "email"] })
+  passport.authenticate("google", {
+    scope: ["profile", "email"],
+  })
 );
+
 router.get(
   "/github",
-  passport.authenticate("github", { scope: ["user:email"] })
+  passport.authenticate("github", {
+    scope: ["user:email"],
+  })
 );
 
 router.get(
