@@ -26,7 +26,7 @@ const OAuthSuccess = () => {
     isLoading,
     error,
   } = useGetProfileQuery(undefined, {
-    skip: token,
+    skip: !token,
   });
 
   useEffect(() => {
