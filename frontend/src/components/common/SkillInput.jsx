@@ -37,7 +37,6 @@ const SkillInput = ({ label, skills = [], setSkills, placeholder, color = "blue"
         {label}
       </label>
       
-      {/* Chip Container */}
       <div className="flex flex-wrap gap-2 mb-3 min-h-[40px]">
         {skills.length === 0 && (
           <p className="text-sm text-gray-400 italic py-2">No skills added yet.</p>
@@ -59,7 +58,6 @@ const SkillInput = ({ label, skills = [], setSkills, placeholder, color = "blue"
         ))}
       </div>
 
-      {/* Input Field */}
       <div className="relative">
         <input
           type="text"

@@ -1,23 +1,14 @@
-// backend/routes/chats.js
-const express = require('express');
-const {
-  getUserChats,
-  getOrCreateChat,
-  sendMessage,
-  getChatMessages
-} = require('../controllers/chat.controller');
-const { protect } = require('../middleware/auth');
-
+const express = require("express");
 const router = express.Router();
+const {
+  sendMessage,
+  getConversation,
+} = require("../controllers/chat.controller");
+const { protect } = require("../middleware/auth");
 
-router.use(protect); // All chat routes are protected
+router.use(protect);
 
-router.route('/')
-  .get(getUserChats)
-  .post(getOrCreateChat);
-
-router.route('/:chatId/messages')
-  .get(getChatMessages)
-  .post(sendMessage);
+router.post("/", sendMessage);
+router.get("/:userId", getConversation);
 
 module.exports = router;

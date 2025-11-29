@@ -1,18 +1,16 @@
-// backend/routes/sessions.js
 const express = require("express");
+const router = express.Router();
 const {
-  createSession,
+  scheduleSession,
   getUserSessions,
-  updateSessionStatus,
+  completeSession,
 } = require("../controllers/session.controller");
 const { protect } = require("../middleware/auth");
 
-const router = express.Router();
+router.use(protect);
 
-router.use(protect); // All session routes are protected
-
-router.route("/").get(getUserSessions).post(createSession);
-
-router.route("/:sessionId/status").put(updateSessionStatus);
+router.post("/", scheduleSession);
+router.get("/", getUserSessions);
+router.put("/:id/complete", completeSession);
 
 module.exports = router;

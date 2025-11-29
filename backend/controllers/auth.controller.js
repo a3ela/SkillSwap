@@ -74,11 +74,9 @@ exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Check for user
     const user = await User.findOne({ email }).select('+password');
 
     if (user && (await user.matchPassword(password))) {
-      // Check if email is verified (only for local auth)
       if (user.authProvider === 'local' && !user.isEmailVerified) {
         return res.status(401).json({
           success: false,
@@ -116,6 +114,7 @@ exports.login = async (req, res) => {
     });
   }
 };
+
 
 // @desc    Verify email
 // @route   POST /api/auth/verify-email
@@ -300,6 +299,20 @@ exports.resetPassword = async (req, res) => {
     });
   }
 };
+
+exports.logout = async (req, res) => {
+  try {
+    if (req.user) {
+      await User.findByIdAndUpdate(req.user._id, { isOnline: false });
+    }
+
+    res.json({ success: true, message: "Logged out successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Logout error" });
+  }
+};
+
 
 // @desc    OAuth Success Handler
 // @route   GET /api/auth/success

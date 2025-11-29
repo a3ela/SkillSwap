@@ -4,13 +4,10 @@ import { Loader, Frown, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Matches = () => {
-  // 1. Get my profile (to compare skills)
   const { data: myProfile } = useGetProfileQuery();
   
-  // 2. Get matches from backend
   const { data: matchesData, isLoading, error } = useGetMatchesQuery();
 
-  // Helper to safely get skill strings array
   const getSkillNames = (skills) => {
     if (!skills) return [];
     return skills.map(s => typeof s === 'string' ? s : s.skill);
@@ -47,7 +44,6 @@ const Matches = () => {
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Header */}
         <div className="mb-10 text-center md:text-left md:flex md:justify-between md:items-end">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2 justify-center md:justify-start">
@@ -59,7 +55,6 @@ const Matches = () => {
             </p>
           </div>
           
-          {/* Quick Filter (Future feature placeholder) */}
           <div className="mt-4 md:mt-0">
              <select className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md">
                <option>All Matches</option>
@@ -69,7 +64,6 @@ const Matches = () => {
           </div>
         </div>
 
-        {/* Content */}
         {matches.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {matches.map((match) => (

@@ -1,4 +1,3 @@
-// src/components/auth/OAuthSuccess.jsx
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";

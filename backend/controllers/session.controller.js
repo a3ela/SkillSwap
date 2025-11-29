@@ -1,132 +1,79 @@
-// backend/controllers/sessionController.js
-const Session = require("../models/Session");
+const Session = require('../models/Session');
+const Connection = require('../models/Connection'); // To verify connection
 
-// @desc    Create session
+// Helper function to generate a unique Room ID
+const generateRoomId = () => {
+    return Math.random().toString(36).substring(2, 9) + Date.now().toString(36);
+};
+
+
+// @desc    Schedule a new session (called by the Learner or Tutor)
 // @route   POST /api/sessions
-// @access  Private
-exports.createSession = async (req, res) => {
+exports.scheduleSession = async (req, res) => {
   try {
-    const { teacherId, skill, scheduledDate, duration, agenda } = req.body;
+    const { partnerId, skill, scheduledTime, role } = req.body;
+    const myId = req.user.id;
 
-    const session = await Session.create({
-      teacher: teacherId,
-      learner: req.user.id,
-      skill,
-      scheduledDate,
-      duration,
-      agenda,
-      status: "pending",
+    // Security check: Must be connected
+    const connection = await Connection.findOne({
+        $or: [
+            { requester: myId, recipient: partnerId, status: 'accepted' },
+            { requester: partnerId, recipient: myId, status: 'accepted' }
+        ]
     });
 
-    await session.populate("teacher", "name email avatar");
-    await session.populate("learner", "name email avatar");
+    if (!connection) {
+        return res.status(403).json({ message: "You must be connected to schedule a session." });
+    }
 
-    res.status(201).json({
-      success: true,
-      data: session,
-      message: "Session requested successfully",
+    const newSession = await Session.create({
+        learner: role === 'learner' ? myId : partnerId,
+        tutor: role === 'tutor' ? myId : partnerId,
+        skill: skill,
+        scheduledTime: new Date(scheduledTime),
+        roomId: generateRoomId() // Unique ID for the video call
     });
+
+    res.status(201).json({ success: true, data: newSession });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      success: false,
-      message: "Server error creating session",
-    });
+    res.status(500).json({ message: error.message });
   }
 };
 
-// @desc    Get user sessions
+
+// @desc    Get all sessions for the current user
 // @route   GET /api/sessions
-// @access  Private
 exports.getUserSessions = async (req, res) => {
-  try {
-    const { type = "all" } = req.query; // all, teaching, learning
-
-    let query = {};
-
-    if (type === "teaching") {
-      query.teacher = req.user.id;
-    } else if (type === "learning") {
-      query.learner = req.user.id;
-    } else {
-      query.$or = [{ teacher: req.user.id }, { learner: req.user.id }];
+    try {
+        const sessions = await Session.find({
+            $or: [{ learner: req.user.id }, { tutor: req.user.id }]
+        })
+        .populate('learner tutor', 'name avatar');
+        
+        res.json({ success: true, data: sessions });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
-
-    const sessions = await Session.find(query)
-      .populate("teacher", "name email avatar")
-      .populate("learner", "name email avatar")
-      .sort({ scheduledDate: 1 });
-
-    res.json({
-      success: true,
-      data: sessions,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      success: false,
-      message: "Server error fetching sessions",
-    });
-  }
 };
 
-// @desc    Update session status
-// @route   PUT /api/sessions/:sessionId/status
-// @access  Private
-exports.updateSessionStatus = async (req, res) => {
-  try {
-    const { sessionId } = req.params;
-    const { status, notes, meetingLink } = req.body;
+// @desc    Mark a session as completed (future step for XP/Gamification)
+// @route   PUT /api/sessions/:id/complete
+exports.completeSession = async (req, res) => {
+    try {
+        const session = await Session.findById(req.params.id);
+        
+        if (!session) {
+            return res.status(404).json({ message: "Session not found" });
+        }
+        
+        if (session.status !== 'completed') {
+            session.status = 'completed';
+            await session.save();
+            // TODO: Here is where you'd trigger the XP/Gamification logic
+        }
 
-    const session = await Session.findById(sessionId);
-
-    if (!session) {
-      return res.status(404).json({
-        success: false,
-        message: "Session not found",
-      });
+        res.json({ success: true, message: "Session marked as complete." });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
-
-    // Check if user is teacher or learner
-    if (
-      session.teacher.toString() !== req.user.id &&
-      session.learner.toString() !== req.user.id
-    ) {
-      return res.status(403).json({
-        success: false,
-        message: "Not authorized to update this session",
-      });
-    }
-
-    // Only teacher can confirm/cancel sessions
-    if (
-      ["confirmed", "cancelled"].includes(status) &&
-      session.teacher.toString() !== req.user.id
-    ) {
-      return res.status(403).json({
-        success: false,
-        message: "Only the teacher can confirm or cancel sessions",
-      });
-    }
-
-    session.status = status;
-    if (notes) session.notes = notes;
-    if (meetingLink) session.meetingLink = meetingLink;
-
-    await session.save();
-    await session.populate("teacher", "name email avatar");
-    await session.populate("learner", "name email avatar");
-
-    res.json({
-      success: true,
-      data: session,
-      message: "Session updated successfully",
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      success: false,
-      message: "Server error updating session",
-    });
-  }
 };

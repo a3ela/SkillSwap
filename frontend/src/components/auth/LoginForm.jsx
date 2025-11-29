@@ -1,4 +1,3 @@
-// src/components/auth/LoginForm.jsx
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -64,7 +63,6 @@ function LoginForm() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          {/* OAuth Buttons */}
           <div className="space-y-3 mb-6">
             <button
               type="button"

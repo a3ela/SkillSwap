@@ -1,31 +1,37 @@
-import React from 'react';
-import { User, Check, MessageCircle, Star, Clock, UserPlus } from 'lucide-react';
-import { useSendConnectionRequestMutation, useGetMyConnectionsQuery } from '../../store/slices/connectionsApiSlice';
+import {
+  User,
+  Check,
+  MessageCircle,
+  Star,
+  Clock,
+  UserPlus,
+} from "lucide-react";
+import {
+  useSendConnectionRequestMutation,
+  useGetMyConnectionsQuery,
+} from "../../store/slices/connectionsApiSlice";
 
 const MatchCard = ({ match, mySkillsToLearn, mySkillsToTeach }) => {
-  // 1. Get my existing connections to check status
   const { data: connectionsData } = useGetMyConnectionsQuery();
-  
-  // 2. Setup mutation to send request
-  const [sendRequest, { isLoading: isSending }] = useSendConnectionRequestMutation();
+  const [sendRequest, { isLoading: isSending }] =
+    useSendConnectionRequestMutation();
 
-  const teachMatch = match.skillsToTeach?.filter(s => 
-    mySkillsToLearn.includes(typeof s === 'string' ? s : s.skill)
-  );
-  
-  const learnMatch = match.skillsToLearn?.filter(s => 
-    mySkillsToTeach.includes(typeof s === 'string' ? s : s.skill)
+  const teachMatch = match.skillsToTeach?.filter((s) =>
+    mySkillsToLearn.includes(typeof s === "string" ? s : s.skill)
   );
 
-  // 3. Helper to check if we are already connected/pending
+  const learnMatch = match.skillsToLearn?.filter((s) =>
+    mySkillsToTeach.includes(typeof s === "string" ? s : s.skill)
+  );
+
   const getConnectionStatus = () => {
     if (!connectionsData?.data) return null;
-    
-    const connection = connectionsData.data.find(c => 
-      (c.requester._id === match._id || c.recipient._id === match._id)
+
+    const connection = connectionsData.data.find(
+      (c) => c.requester._id === match._id || c.recipient._id === match._id
     );
 
-    return connection ? connection.status : null; // 'pending', 'accepted', or null
+    return connection ? connection.status : null;
   };
 
   const status = getConnectionStatus();
@@ -33,9 +39,9 @@ const MatchCard = ({ match, mySkillsToLearn, mySkillsToTeach }) => {
   const handleConnect = async () => {
     try {
       await sendRequest(match._id).unwrap();
-      // Redux will automatically refresh the UI because of 'invalidatesTags'
+      console.log("sent");
     } catch (err) {
-      console.error('Failed to connect:', err);
+      console.error("Failed to connect:", err);
     }
   };
 
@@ -46,9 +52,9 @@ const MatchCard = ({ match, mySkillsToLearn, mySkillsToTeach }) => {
           <div className="flex items-center space-x-4">
             <div className="relative">
               {match.avatar ? (
-                <img 
-                  src={match.avatar} 
-                  alt={match.name} 
+                <img
+                  src={match.avatar}
+                  alt={match.name}
                   referrerPolicy="no-referrer"
                   className="h-16 w-16 rounded-full object-cover border border-gray-200"
                 />
@@ -57,8 +63,12 @@ const MatchCard = ({ match, mySkillsToLearn, mySkillsToTeach }) => {
                   {match.name?.charAt(0).toUpperCase()}
                 </div>
               )}
+              <span
+                className={`absolute bottom-1 right-1 h-4 w-4 rounded-full border-2 border-white 
+    ${match.isOnline ? "bg-green-500" : "bg-gray-400"}`}
+              ></span>
             </div>
-            
+
             <div>
               <h3 className="text-lg font-bold text-gray-900">{match.name}</h3>
               <div className="flex items-center text-sm text-yellow-500 mt-1">
@@ -75,7 +85,6 @@ const MatchCard = ({ match, mySkillsToLearn, mySkillsToTeach }) => {
           {match.bio || "No bio provided yet."}
         </p>
 
-        {/* Why we matched */}
         <div className="mt-6 space-y-3">
           {teachMatch?.length > 0 && (
             <div>
@@ -84,8 +93,11 @@ const MatchCard = ({ match, mySkillsToLearn, mySkillsToTeach }) => {
               </p>
               <div className="flex flex-wrap gap-2">
                 {teachMatch.map((skill, i) => (
-                  <span key={i} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                    {typeof skill === 'string' ? skill : skill.skill}
+                  <span
+                    key={i}
+                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                  >
+                    {typeof skill === "string" ? skill : skill.skill}
                   </span>
                 ))}
               </div>
@@ -99,8 +111,11 @@ const MatchCard = ({ match, mySkillsToLearn, mySkillsToTeach }) => {
               </p>
               <div className="flex flex-wrap gap-2">
                 {learnMatch.map((skill, i) => (
-                  <span key={i} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                     {typeof skill === 'string' ? skill : skill.skill}
+                  <span
+                    key={i}
+                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                  >
+                    {typeof skill === "string" ? skill : skill.skill}
                   </span>
                 ))}
               </div>
@@ -109,25 +124,29 @@ const MatchCard = ({ match, mySkillsToLearn, mySkillsToTeach }) => {
         </div>
       </div>
 
-      {/* Dynamic Action Buttons */}
       <div className="border-t border-gray-100 bg-gray-50 px-6 py-4 flex gap-3">
-        {status === 'accepted' ? (
+        {status === "accepted" ? (
           <button className="flex-1 inline-flex justify-center items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
             <MessageCircle className="h-4 w-4 mr-2" />
             Message
           </button>
-        ) : status === 'pending' ? (
-          <button disabled className="flex-1 inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-yellow-500 cursor-not-allowed opacity-80">
+        ) : status === "pending" ? (
+          <button
+            disabled
+            className="flex-1 inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-yellow-500 cursor-not-allowed opacity-80"
+          >
             <Clock className="h-4 w-4 mr-2" />
             Pending
           </button>
         ) : (
-          <button 
+          <button
             onClick={handleConnect}
             disabled={isSending}
             className="flex-1 inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors disabled:opacity-50"
           >
-            {isSending ? 'Sending...' : (
+            {isSending ? (
+              "Sending..."
+            ) : (
               <>
                 <UserPlus className="h-4 w-4 mr-2" />
                 Connect

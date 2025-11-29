@@ -105,7 +105,10 @@ avatar: {
       },
     ],
   },
-
+isOnline: {
+  type: Boolean,
+  default: false,
+},
   // Gamification
   xp: { type: Number, default: 0 },
   level: { type: Number, default: 1 },

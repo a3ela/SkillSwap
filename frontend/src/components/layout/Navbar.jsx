@@ -21,7 +21,7 @@ import {
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
-  const [isNotifDropdownOpen, setIsNotifDropdownOpen] = useState(false); 
+  const [isNotifDropdownOpen, setIsNotifDropdownOpen] = useState(false);
 
   const dropdownRef = useRef(null);
   const notifRef = useRef(null);
@@ -30,10 +30,9 @@ const Navbar = () => {
   const dispatch = useDispatch();
   const { userInfo } = useSelector((state) => state.auth);
 
-
   const { data: connectionsData } = useGetMyConnectionsQuery(undefined, {
     skip: !userInfo,
-    pollingInterval: 30000, 
+    pollingInterval: 30000,
   });
 
   const [respondToRequest] = useRespondToRequestMutation();
@@ -42,6 +41,23 @@ const Navbar = () => {
     connectionsData?.data?.filter(
       (c) => c.status === "pending" && c.recipient._id === userInfo?._id
     ) || [];
+
+  const handleAccept = async (id) => {
+    try {
+      await respondToRequest({ id, status: "accepted" }).unwrap();
+      setIsNotifDropdownOpen(false);
+    } catch (err) {
+      console.error("Failed to accept:", err);
+    }
+  };
+  const handleDecline = async (id) => {
+    try {
+      await respondToRequest({ id, status: "rejected" }).unwrap();
+      setIsNotifDropdownOpen(false);
+    } catch (err) {
+      console.error("Failed to decline:", err);
+    }
+  };
 
   const unreadCount = pendingRequests.length;
 
@@ -66,14 +82,6 @@ const Navbar = () => {
   const handleLogout = () => {
     dispatch(logout());
     setIsProfileDropdownOpen(false);
-  };
-
-  const handleAccept = async (id) => {
-    try {
-      await respondToRequest({ id, status: "accepted" }).unwrap();
-    } catch (err) {
-      console.error(err);
-    }
   };
 
   const isActive = (path) => location.pathname === path;
@@ -164,7 +172,10 @@ const Navbar = () => {
                                   >
                                     Accept
                                   </button>
-                                  <button className="inline-flex items-center px-2 py-1 bg-white border border-gray-300 text-gray-700 text-xs font-medium rounded hover:bg-gray-50">
+                                  <button
+                                    onClick={() => handleDecline(req._id)}
+                                    className="inline-flex items-center px-2 py-1 bg-white border border-gray-300 text-gray-700 text-xs font-medium rounded hover:bg-gray-50"
+                                  >
                                     Decline
                                   </button>
                                 </div>
@@ -176,7 +187,7 @@ const Navbar = () => {
                     </div>
                   )}
                 </div>
-            
+
                 <div className="relative" ref={dropdownRef}>
                   <button
                     onClick={() =>

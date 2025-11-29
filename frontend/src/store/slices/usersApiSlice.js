@@ -7,44 +7,44 @@ export const usersApiSlice = apiSlice.injectEndpoints({
       query: () => ({
         url: `${USERS_URL}/profile`,
       }),
-      providesTags: ['User'],
+      providesTags: ["User"],
     }),
     updateProfile: builder.mutation({
       query: (data) => ({
         url: `${USERS_URL}/profile`,
-        method: 'PUT',
+        method: "PUT",
         body: data,
       }),
-      invalidatesTags: ['User'],
+      invalidatesTags: ["User"],
     }),
     getMatches: builder.query({
       query: () => ({
         url: `${USERS_URL}/matches`,
       }),
-      providesTags: ['User'],
+      providesTags: ["User"],
     }),
     addSkillToTeach: builder.mutation({
       query: (data) => ({
         url: `${USERS_URL}/skills/teach`,
-        method: 'POST',
+        method: "POST",
         body: data,
       }),
-      invalidatesTags: ['User'],
+      invalidatesTags: ["User"],
     }),
     addSkillToLearn: builder.mutation({
       query: (data) => ({
         url: `${USERS_URL}/skills/learn`,
-        method: 'POST',
+        method: "POST",
         body: data,
       }),
-      invalidatesTags: ['User'],
+      invalidatesTags: ["User"],
     }),
     removeSkill: builder.mutation({
       query: ({ type, skillId }) => ({
         url: `${USERS_URL}/skills/${type}/${skillId}`,
-        method: 'DELETE',
+        method: "DELETE",
       }),
-      invalidatesTags: ['User'],
+      invalidatesTags: ["User"],
     }),
   }),
 });

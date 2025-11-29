@@ -1,4 +1,4 @@
-const User = require('../models/User');
+const User = require("../models/User");
 
 // @desc    Get user profile
 // @route   GET /api/users/profile
@@ -8,13 +8,13 @@ exports.getProfile = async (req, res) => {
     const user = await User.findById(req.user.id);
     res.json({
       success: true,
-      data: user
+      data: user,
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({
       success: false,
-      message: 'Server error'
+      message: "Server error",
     });
   }
 };
@@ -22,24 +22,45 @@ exports.getProfile = async (req, res) => {
 // @desc    Update user profile
 // @route   PUT /api/users/profile
 // @access  Private
+// backend/controllers/user.controller.js
 exports.updateProfile = async (req, res) => {
   try {
-    const user = await User.findByIdAndUpdate(
-      req.user.id,
-      req.body,
-      { new: true, runValidators: true }
-    );
+    const user = await User.findById(req.user.id);
 
-    res.json({
-      success: true,
-      data: user,
-      message: 'Profile updated successfully'
-    });
+    if (user) {
+      user.name = req.body.name || user.name;
+      user.bio = req.body.bio || user.bio;
+
+      if (req.body.skillsToTeach) {
+        user.skillsToTeach = req.body.skillsToTeach.map(s => {
+  
+          return typeof s === 'string' ? { skill: s, proficiency: 'intermediate' } : s;
+        });
+      }
+
+      if (req.body.skillsToLearn) {
+        user.skillsToLearn = req.body.skillsToLearn.map(s => {
+       
+          return typeof s === 'string' ? { skill: s, currentLevel: 'beginner' } : s;
+        });
+      }
+   
+
+      const updatedUser = await user.save();
+
+      res.json({
+        success: true,
+        data: updatedUser,
+        message: 'Profile updated successfully'
+      });
+    } else {
+      res.status(404).json({ success: false, message: 'User not found' });
+    }
   } catch (error) {
-    console.error(error);
+    console.error(error); 
     res.status(500).json({
       success: false,
-      message: 'Server error updating profile'
+      message: error.message 
     });
   }
 };
@@ -50,33 +71,33 @@ exports.updateProfile = async (req, res) => {
 exports.getMatches = async (req, res) => {
   try {
     const currentUser = await User.findById(req.user.id);
-    
+
     // Find users who have skills we want to learn, and want skills we have
     const potentialMatches = await User.find({
       _id: { $ne: req.user.id }, // Exclude current user
       $or: [
-        { 
-          'skillsToTeach.skill': { 
-            $in: currentUser.skillsToLearn.map(s => s.skill) 
-          } 
+        {
+          "skillsToTeach.skill": {
+            $in: currentUser.skillsToLearn.map((s) => s.skill),
+          },
         },
-        { 
-          'skillsToLearn.skill': { 
-            $in: currentUser.skillsToTeach.map(s => s.skill) 
-          } 
-        }
-      ]
-    }).select('name email bio avatar skillsToTeach skillsToLearn rating');
+        {
+          "skillsToLearn.skill": {
+            $in: currentUser.skillsToTeach.map((s) => s.skill),
+          },
+        },
+      ],
+    }).select("name email bio avatar skillsToTeach skillsToLearn rating");
 
     res.json({
       success: true,
-      data: potentialMatches
+      data: potentialMatches,
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({
       success: false,
-      message: 'Server error finding matches'
+      message: "Server error finding matches",
     });
   }
 };
@@ -87,7 +108,7 @@ exports.getMatches = async (req, res) => {
 exports.addSkillToTeach = async (req, res) => {
   try {
     const { skill, proficiency } = req.body;
-    
+
     const user = await User.findById(req.user.id);
     user.skillsToTeach.push({ skill, proficiency });
     await user.save();
@@ -95,13 +116,13 @@ exports.addSkillToTeach = async (req, res) => {
     res.json({
       success: true,
       data: user.skillsToTeach,
-      message: 'Skill added successfully'
+      message: "Skill added successfully",
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({
       success: false,
-      message: 'Server error adding skill'
+      message: "Server error adding skill",
     });
   }
 };
@@ -112,7 +133,7 @@ exports.addSkillToTeach = async (req, res) => {
 exports.addSkillToLearn = async (req, res) => {
   try {
     const { skill, currentLevel } = req.body;
-    
+
     const user = await User.findById(req.user.id);
     user.skillsToLearn.push({ skill, currentLevel });
     await user.save();
@@ -120,13 +141,13 @@ exports.addSkillToLearn = async (req, res) => {
     res.json({
       success: true,
       data: user.skillsToLearn,
-      message: 'Skill added successfully'
+      message: "Skill added successfully",
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({
       success: false,
-      message: 'Server error adding skill'
+      message: "Server error adding skill",
     });
   }
 };
@@ -137,26 +158,30 @@ exports.addSkillToLearn = async (req, res) => {
 exports.removeSkill = async (req, res) => {
   try {
     const { type, skillId } = req.params;
-    
+
     const user = await User.findById(req.user.id);
-    
-    if (type === 'teach') {
-      user.skillsToTeach = user.skillsToTeach.filter(skill => skill._id.toString() !== skillId);
-    } else if (type === 'learn') {
-      user.skillsToLearn = user.skillsToLearn.filter(skill => skill._id.toString() !== skillId);
+
+    if (type === "teach") {
+      user.skillsToTeach = user.skillsToTeach.filter(
+        (skill) => skill._id.toString() !== skillId
+      );
+    } else if (type === "learn") {
+      user.skillsToLearn = user.skillsToLearn.filter(
+        (skill) => skill._id.toString() !== skillId
+      );
     }
-    
+
     await user.save();
 
     res.json({
       success: true,
-      message: 'Skill removed successfully'
+      message: "Skill removed successfully",
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({
       success: false,
-      message: 'Server error removing skill'
+      message: "Server error removing skill",
     });
   }
 };
